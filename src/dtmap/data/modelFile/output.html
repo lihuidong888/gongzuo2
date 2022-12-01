@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  111
+</body>
+<script>
+  // 用来做唯一的标识符号id
+  let num = 4; 
+  // 用IE浏览器来运行这个html代码创建树形控件的数据
+  function init2(opt) {
+    var fso = new ActiveXObject("Scripting.FileSystemObject");
+    // 获取目录下所有文件，对于该浏览器缓存目录，仅能获取到一个文件
+    // var path = 'C:\\Users\\Administrator\\Desktop\\我的项目\\DTVueDemo\\src\\dtmap\\data\\testdata\\models\\gltf_glb';
+    var path = opt.path;
+    //path = 'F:\\test';
+    var fldr = fso.GetFolder(path);
+    var ff = new Enumerator(fldr.Files);
+    var fileArray = [];
+    var fileName = '';
+    var count = 0;
+    for (; !ff.atEnd(); ff.moveNext()) {
+      fileName = ff.item().Name + ''; // 文件名
+      if (fileName.substring(fileName.indexOf('.') + 1) === opt.suffix) {
+        fileName = fileName.substring(0, fileName.indexOf('.'));
+        // fileName = fileName.substring(fileName.lastIndexOf('@') + 1);
+        fileArray.push(fileName);
+      }
+      count++;
+    }
+
+    let Array3 = [];
+    if (opt.suffix === "json") {
+        let obj = {
+          id: 3 + String(num),
+          label: opt.label,
+        }
+        num ++; // 用过就加
+        Array3.push(obj);
+    } else {
+      fileArray.forEach(function (item) {
+        let obj = {
+          id: 3 + String(num),
+          label: item,
+        }
+        num ++;
+        Array3.push(obj);
+      })
+    }
+
+    let Obj2 = {
+      id: 2 + String(num),
+      label: opt.suffix + "模型",
+      children: []
+    }
+    num ++;
+    Obj2.children = Array3
+    return Obj2;
+  }
+  // 用IE浏览器来运行这个html代码创建树形控件的数据
+  let treeArray2 = []
+  // 创建DAE模型数据
+  let relativePathDAE = "./data/testdata/models/dae/cars"
+  let path = "C:\\Users\\Administrator\\Desktop\\我的项目\\DTVueDemo\\src\\dtmap\\data\\testdata\\models\\dae\\cars"
+  let suffix = "DAE"
+  let optionObj = {
+    path: path,
+    suffix: suffix
+  }
+  let daeObj2 = init2(optionObj)
+  daeObj2.path = relativePathDAE
+  treeArray2.push(daeObj2);
+  // 创建fbx模型数据
+  let relativePathFBX = "./data/testdata/models/fbx"
+  let path1 = "C:\\Users\\Administrator\\Desktop\\我的项目\\DTVueDemo\\src\\dtmap\\data\\testdata\\models\\fbx"
+  let suffix1 = "fbx"
+  let optionObj1 = {
+    path: path1,
+    suffix: suffix1
+  }
+  let fbxObj2 = init2(optionObj1)
+  fbxObj2.path = relativePathFBX
+  treeArray2.push(fbxObj2);
+  // 创建glb模型数据
+  let relativePathGLB = "./data/testdata/models/gltf_glb"
+  let path2 = "C:\\Users\\Administrator\\Desktop\\我的项目\\DTVueDemo\\src\\dtmap\\data\\testdata\\models\\gltf_glb"
+  let suffix2 = "glb"
+  let optionObj2 = {
+    path: path2,
+    suffix: suffix2
+  }
+  let glbObj2 = init2(optionObj2)
+  glbObj2.path = relativePathGLB
+  treeArray2.push(glbObj2);
+  // 创建3dtile模型数据1
+  let relativePath3dtile1 = "./data/testdata/3dtiles/ft"
+  let path3 = "C:\\Users\\Administrator\\Desktop\\我的项目\\DTVueDemo\\src\\dtmap\\data\\testdata\\3dtiles\\ft"
+  let suffix3 = "json"
+  let optionObj3 = {
+    path: path3,
+    suffix: suffix3,
+    label: 'ft'
+  }
+  let jsonObj2 = init2(optionObj3)
+  jsonObj2.label = '3dtile' // 改名
+  jsonObj2.path = relativePath3dtile1
+  treeArray2.push(jsonObj2);
+  // 创建3dtile模型数据2
+  let relativePath3dtile2 = "./data/testdata/3dtiles/ft-pipe"
+  let path4 = "C:\\Users\\Administrator\\Desktop\\我的项目\\DTVueDemo\\src\\dtmap\\data\\testdata\\3dtiles\\ft-pipe"
+
+  let suffix4 = "json"
+  let optionObj4 = {
+    path: path4,
+    suffix: suffix4,
+    label: 'ft-pipe'
+  }
+  let jsonObj22 = init2(optionObj4)
+  jsonObj22.label = '3dtile' // 改名
+  jsonObj22.path = relativePath3dtile2
+  treeArray2.push(jsonObj22);
+  // 创建3dtile模型数据3
+  let relativePath3dtile3 = "./data/testdata/BIM/BIM_TEST_g1"
+  let path5 = "C:\\Users\\Administrator\\Desktop\\我的项目\\DTVueDemo\\src\\dtmap\\data\\testdata\\BIM\\BIM_TEST_g1"
+
+  let suffix5 = "json"
+  let optionObj5 = {
+    path: path5,
+    suffix: suffix5,
+    label: 'BIM'
+  }
+  let jsonObj222 = init2(optionObj5)
+  jsonObj222.label = '3dtile' // 改名
+  jsonObj222.path = relativePath3dtile3
+  treeArray2.push(jsonObj222);
+  // 创建geojson数据
+  let relativePath3dtile4 = "./data/testdata/geojson"
+  let path6 = "C:\\Users\\Administrator\\Desktop\\我的项目\\DTVueDemo\\src\\dtmap\\data\\testdata\\geojson"
+  let suffix6 = "geojson"
+  let optionObj6 = {
+    path: path6,
+    suffix: suffix6
+  }
+  let jsonObj2222 = init2(optionObj6)
+  jsonObj2222.path = relativePath3dtile4
+  treeArray2.push(jsonObj2222);
+  console.log(treeArray2);
+  var pp = JSON.stringify(treeArray2)
+  console.log(pp)
+
+  // 将treeArray2生成的数据内容写入到文件中
+  var fso, f, s;
+  fso = new ActiveXObject("Scripting.FileSystemObject");
+  f = fso.OpenTextFile("C:\\Users\\Administrator\\Desktop\\我的项目\\DTVueDemo\\src\\dtmap\\data\\modelFile\\writeFile.txt",
+    8, true);
+  f.WriteLine(pp);
+  f.Close();
+  console.log('write ok');
+
+</script>
+
+</html>

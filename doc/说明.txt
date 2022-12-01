@@ -1,0 +1,15 @@
+DTVueDemo\doc\particle : 粒子特效用贴图
+DTVueDemo\doc\utils.js : 功能测试的示例
+DTVueDemo\doc\平台API文档-第二版0704.pdf: api文档
+
+DTVueDemo\src\dtmap\ : 引擎所在目录
+DTVueDemo\src\dtmap\assets\font : 字体所在目录
+
+
+npm install把相关模块安装好之后，
+npm run dev可以跑开发调试环境，
+npm run build可以打包出来，之后用nginx或者iis发布
+
+底层相关的，除了qtLoader.js,其它静态文件都在dtmap这里。
+如果别的开发想要修改库文件的路径，除了在vue文件中修改引用位置以外，
+webpack.dev.conf.js和webpack.prod.conf.js也要对应作修改，不然npm run会报错
