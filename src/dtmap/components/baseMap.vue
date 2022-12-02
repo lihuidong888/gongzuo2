@@ -43,13 +43,13 @@ export default {
   data() {
     return {
       showArrow: false,
-      value: "100",
+      value: "0"
     };
   },
   mounted() {
-    setTimeout(()=>{
-      this.addTerrainProvider();
-    },2000)
+    // setTimeout(() => {
+    //   this.addTerrainProvider();
+    // }, 2000);
   },
   methods: {
     // 关闭底图
@@ -68,7 +68,7 @@ export default {
         minimumLevel: 1, //最小层级
         tileWidth: 256, //瓦片宽
         tileHeight: 256, //瓦片长
-        hasAlphaChannel: true, //阿尔法
+        hasAlphaChannel: true //阿尔法
         //licensekey:""//请求头需要传入key的参数
       };
       this.addxyzImagery(opt);
@@ -95,7 +95,7 @@ export default {
         );
         //无请求头添加的，不需要添加
         if (option.licensekey) {
-          imageryProvider.setUrlFunctor(function (x, y, level) {
+          imageryProvider.setUrlFunctor(function(x, y, level) {
             var url =
               that.newurl +
               (level - 9) +
@@ -159,17 +159,17 @@ export default {
       let scene = GlobalViewer.scene;
       let globe = scene.globe;
       globe.setDefaultTerrain();
-    },
+    }
   },
   props: ["showBaseMap"],
-  watch:{
-     value(val){
-        if(val === "100"){
-           this.addTerrainProvider();
-        }else if(val === "0"){
-           this.addDefaultTerrain();
-        }
-     }
+  watch: {
+    value(val) {
+      if (val === "100") {
+        this.addTerrainProvider();
+      } else if (val === "0") {
+        this.addDefaultTerrain();
+      }
+    }
   }
 };
 </script>
@@ -187,7 +187,7 @@ export default {
 }
 .baseMap .title {
   height: 36px;
-  background-image:url("../assets/image图片/baseMaginTitle.png");
+  background-image: url("../assets/image图片/baseMaginTitle.png");
 }
 .baseMap .title .left {
   float: left;

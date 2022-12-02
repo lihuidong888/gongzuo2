@@ -17,6 +17,15 @@
 </template>
 
 <script>
+// 跳转的位置点
+window.point = [
+  { lon: 114.03585691, lat: 22.54412276, height: 20, id: 0 },
+  { lon: 114.11640021, lat: 22.55061716, height: 20, id: 1 },
+  { lon: 114.17684616, lat: 22.54787511, height: 20, id: 2 },
+  { lon: 114.1590136, lat: 22.51254139, height: 20, id: 3 },
+  { lon: 114.0801523, lat: 22.47828424, height: 20, id: 4 },
+  { lon: 114.05300844, lat: 22.530465169, height: 20, id: 5 }
+];
 window.checkObj = []; //选中的节点
 import data from "../data/modelFile/writeFile";
 export default {
@@ -159,6 +168,13 @@ export default {
     },
     // 选中加载数据
     handleClick(node, checkObj) {
+      // 生成不同随机数,飞不同点
+      var preNum = 0;
+      var num = Math.floor(Math.random() * 6);
+      while (num === preNum) {
+        num = Math.floor(Math.random() * 6);
+      }
+      preNum = num;
       // 目标多选框被去掉时候,不加载模型,删除模型并跳转到选中的第一个
       console.log("1111", node, checkObj);
       window.checkObj.push(checkObj);
@@ -186,12 +202,14 @@ export default {
       // 加载glb模型
       if (Number(node.id) >= 312 && Number(node.id) <= 340 && !node.children) {
         let glbPath = this.dataTree[0].children[2].path;
-        this.addmodelglb(glbPath, node);
+        let cctvUrl = glbPath + "/" + node.label + ".glb";
+        this.model(cctvUrl, window.point[preNum]);
       }
       // 加载FBX模型
       if (Number(node.id) >= 39 && Number(node.id) <= 310 && !node.children) {
         let FBXPath = this.dataTree[0].children[1].path;
-        this.addmodelFBX(FBXPath, node);
+        let cctvUrl = FBXPath + "/" + node.label + ".fbx";
+        this.model(cctvUrl, window.point[preNum]);
       }
       // 加载3dtile模型
       if (Number(node.id) >= 342 && Number(node.id) <= 346 && !node.children) {
@@ -206,21 +224,24 @@ export default {
       // 加载DAE模型
       if (Number(node.id) >= 34 && Number(node.id) <= 37 && !node.children) {
         let daePath = this.dataTree[0].children[0].path;
-        this.addmodelDae(daePath, node);
+        let cctvUrl = daePath + "/" + node.label + ".DAE";
+        this.model(cctvUrl, window.point[preNum]);
       }
     },
-    //dae 添加
-    addmodelDae(daePath, node) {
+    // 添加模型
+    model(path, point) {
       this.deletemodel();
       if (!window.cctvModel) {
-        let cctvUrl = daePath + "/" + node.label + ".DAE";
-        let model = new Li.Model(cctvUrl);
+        let model = new Li.Model(path);
         let entity = new Li.Entity();
         entity.addComponent(model);
-        // entity.objectName = "model";
         GlobalViewer.scene.addEntity(entity);
-        let carto = Li.Cartographic.fromDegrees(114.05300844, 22.530465169, 10); //坐标
-        // model.transform.scale = 100;
+        let carto = Li.Cartographic.fromDegrees(
+          point.lon,
+          point.lat,
+          point.height
+        ); //坐标
+
         model.transform.cartographic = carto;
         //模型正在渲染中
         model.readyPromise.then(() => {
@@ -254,38 +275,6 @@ export default {
         return entity;
       }
     },
-    //gltf glb 添加
-    addmodelglb(glbPath, node) {
-      this.deletemodel();
-      if (!window.cctvModel) {
-        let cctvUrl = glbPath + "/" + node.label + ".glb";
-        let model = new Li.Model(cctvUrl);
-        let entity = new Li.Entity();
-        entity.addComponent(model);
-        // entity.objectName = "model";
-        GlobalViewer.scene.addEntity(entity);
-        let carto = Li.Cartographic.fromDegrees(
-          114.05300844,
-          22.530465169,
-          200
-        ); //坐标
-        model.transform.cartographic = carto;
-        //模型正在渲染中
-        model.readyPromise.then(() => {
-          model.entity.travalRenderers(function(renderer) {
-            // let objectName = renderer.entity.objectName;
-            // console.log("nodeName:" + objectName);
-            console.log(renderer);
-            let camera = GlobalViewer.scene.mainCamera;
-            let p = renderer.boundingVolume.center;
-            console.log(carto, p);
-            camera.flyTo(p.toCartographic());
-          });
-        });
-        window.cctvModel = entity;
-        return entity;
-      }
-    },
     //删除模型
     deletemodel() {
       if (window.cctvModel) {
@@ -298,78 +287,6 @@ export default {
       if (window.tilesetmodel) {
         window.tilesetmodel.delete();
         window.tilesetmodel = null;
-      }
-    },
-    //添加模型
-    // modelLayer(url, carto, rotation, offset, scale) {
-    //   let modelLayer = new Li.ModelLayer();
-    //   modelLayer.url = url;
-    //   modelLayer.cartographic = carto;
-    //   modelLayer.rotation = rotation;
-    //   modelLayer.offset = offset;
-    //   if (scale) {
-    //     //不设置，默认时为1
-    //     modelLayer.scale = scale;
-    //   }
-    //   modelLayer.componentComplete();
-    //   return modelLayer;
-    // },
-    addmodel(url, carto, rotation, offset, scale, srs) {
-      let model = new Li.Model(url);
-      let entity = new Li.Entity();
-      entity.addComponent(model);
-      GlobalViewer.scene.addEntity(entity);
-      if (!srs) {
-        this.transform(model, carto, rotation, offset, scale);
-      } else {
-        model.srs = srs;
-      }
-      return entity;
-    },
-    transform(m, carto, rotation, offset, mscale) {
-      let model = m;
-      //位置
-      if (carto) {
-        model.transform.cartographic = carto;
-      }
-      // 偏移
-      if (offset) {
-        model.offset = offset;
-      }
-      // 旋转
-      if (rotation) {
-        model.rotation = rotation;
-      }
-      // 缩放
-      if (mscale) {
-        model.scale = mscale;
-      }
-    },
-    //FBX添加
-    addmodelFBX(FBXPath, node) {
-      this.deletemodel();
-      if (!window.cctvModel) {
-        let cctvUrl = FBXPath + "/" + node.label + ".fbx";
-        // window.document.location.origin + "/" + "data/model/Girl.fbx";
-        let carto = Li.Cartographic.fromDegrees(114.05300844, 22.530465169, 15); //坐标
-        let rotation = Li.Quaternion.fromEulerAngles(0, 0, 0); //旋转
-        let offset = Li.Vector3.create(0, 0, 0); //偏移量
-        this.nowscale = 0.3;
-        let scale = Li.Vector3.create(
-          this.nowscale,
-          this.nowscale,
-          this.nowscale
-        ); //比例
-        window.cctvModel = this.addmodel(
-          cctvUrl,
-          carto,
-          rotation,
-          offset,
-          scale
-        );
-        let camera = GlobalViewer.scene.mainCamera;
-        var p = Li.Cartographic.fromDegrees(114.05300844, 22.530465169, 150);
-        camera.cameraController().flyToCartographic(p, 3, 0, -90, 0);
       }
     },
     //3Dtiles 添加
@@ -400,7 +317,6 @@ export default {
       window.tilesetmodel = tileset;
     }
   },
-
   mounted() {
     document.body.style.overflow = "hidden";
     let dataFrame = [
