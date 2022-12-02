@@ -1,4 +1,4 @@
-{
+var a = {
 "type": "FeatureCollection",
 "name": "street",
 "features": [
@@ -14,3 +14,4 @@
 { "type": "Feature", "properties": { "jd": "南园街道" }, "geometry": { "type": "Point", "coordinates": [ 114.089723601100005, 22.540253793049999 ] } }
 ]
 }
+window.properties =a.features[0].properties;

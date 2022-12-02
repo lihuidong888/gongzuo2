@@ -26,6 +26,7 @@ window.point = [
   { lon: 114.0801523, lat: 22.47828424, height: 20, id: 4 },
   { lon: 114.05300844, lat: 22.530465169, height: 20, id: 5 }
 ];
+window.FieldList = []; //撒点属性
 window.checkObj = []; //选中的节点
 import data from "../data/modelFile/writeFile";
 export default {
@@ -33,6 +34,7 @@ export default {
     return {
       nowscale: 1, // 缩放比例
       dataTree: [],
+      GeoJsonModel: null,
       haha: [
         {
           id: 0,
@@ -227,6 +229,11 @@ export default {
         let cctvUrl = daePath + "/" + node.label + ".DAE";
         this.model(cctvUrl, window.point[preNum]);
       }
+      // 加载Geojson点
+      if (node.label.indexOf("点") > -1 && !node.children) {
+        let geojsonurl = "./data/testdata/geojson/" + node.label + ".geojson";
+        this.spreadPoint(geojsonurl);
+      }
     },
     // 添加模型
     model(path, point) {
@@ -315,9 +322,101 @@ export default {
         camera.cameraController().flyToCartographic(p, 3, 0, -90, 0);
       });
       window.tilesetmodel = tileset;
+    },
+    //撒点
+    spreadPoint(geojsonurl) {
+      // let FieldList = [];
+      // let objKeysArr = Object.keys(properties);
+      // let labelfield = objKeysArr[0];
+      // if (objKeysArr[1]) {
+      //   FieldList.push(objKeysArr[0]);
+      //   FieldList.push(objKeysArr[1]);
+      // } else {
+      //   FieldList.push(objKeysArr[0]);
+      // }
+      let FieldList = ["lng", "lat"];
+      let labelfield = "lng";
+      window.FieldList = FieldList;
+      let opt = {
+        iconurl: "assets/image图片/blueicon.png",
+        selectediconurl: "assets/image图片/redicon.png",
+        iconwidth: 40,
+        iconheight: 50,
+        labeloffsetx: -10,
+        labeloffsety: -10,
+        iconoffsetx: 0,
+        iconoffsety: 0,
+        scaleDistance: [6000, 0.5],
+        height: 0.5,
+        labelfield,
+        geojsonurl,
+        FieldList
+      };
+
+      this.GeoJsonModel = this.addGeoJsonModel(opt);
+    },
+    addGeoJsonModel(opt) {
+      let scene = GlobalViewer.scene;
+      let camera = scene.mainCamera;
+      let position = Li.Cartographic.fromDegrees(114.054494, 22.540745, 1300);
+      camera.flyTo(position);
+      opt = opt || {};
+      let url = window.document.location.href;
+      let baseUrl = url.substring(0, url.lastIndexOf("/") + 1);
+      var GeoJsonModel = new Li.GeoJsonModel();
+
+      GeoJsonModel.iconUrl = baseUrl + opt.iconurl;
+      GeoJsonModel.selectedIconUrl = baseUrl + opt.selectediconurl;
+      GeoJsonModel.iconSize = Li.Vector2.create(opt.iconwidth, opt.iconheight); //图标大小
+      GeoJsonModel.labelOffset = Li.Vector2.create(
+        opt.labeloffsetx,
+        opt.labeloffsety
+      ); //x, y偏移值
+
+      GeoJsonModel.iconOffset = Li.Vector2.create(
+        opt.iconoffsetx,
+        opt.iconoffsety
+      );
+      GeoJsonModel.scaleByDistance = Li.Vector2.create(
+        opt.scaleDistance[0],
+        opt.scaleDistance[1]
+      );
+      GeoJsonModel.height = opt.height; //高度
+      console.log(opt.labelfield);
+      console.log(GeoJsonModel);
+      console.log(GeoJsonModel.labelField);
+
+      GeoJsonModel.labelField = opt.labelfield; //标签
+      GeoJsonModel.addField(opt.FieldList[0]); //添加字段
+      GeoJsonModel.addField(opt.FieldList[1]); //添加字段
+      if (opt.geojsonurl) {
+        GeoJsonModel.load(opt.geojsonurl); //加载GeoJson文件的url
+      }
+      //or addString可通过字符串类型数据加载
+      if (opt.testString) {
+        GeoJsonModel.addString(opt.testString);
+      }
+      return GeoJsonModel;
+    },
+    // geojson创建，事件触发拾取撒点属性
+    createPickModel(event) {
+      var e = event || window.event;
+      if (e) {
+        let feature = Li.GeoJsonModel.getSelectedFeature();
+        if (feature) {
+          console.log("拾取撒点属性");
+          let property = feature.getProperty(window.FieldList[0]); //要查询的属性
+          if (property) {
+            console.log(window.FieldList[0] + property);
+          }
+        }
+      }
     }
   },
   mounted() {
+    document
+      .getElementById("qtcanvas")
+      .addEventListener("click", this.createPickModel); // 监听geojson创建,拾取撒点属性
     document.body.style.overflow = "hidden";
     let dataFrame = [
       {
