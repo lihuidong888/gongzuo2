@@ -1,4 +1,4 @@
-{
+var a = {
   "type": "FeatureCollection",
   "features": [
 {"type":"Feature","geometry":{"type":"LineString","coordinates":[[-86.412073,32.493105],[-86.46064,32.553323],[-86.524434,32.707058]]},"properties":{"name":"I- 65","type":"I","length":16.397990538788587,"state":"AL","id":"65"}},

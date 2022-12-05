@@ -28,6 +28,7 @@ window.point = [
 ];
 window.FieldList = []; //撒点属性
 window.checkObj = []; //选中的节点
+window.entityLine = [];
 import data from "../data/modelFile/writeFile";
 export default {
   data() {
@@ -230,9 +231,19 @@ export default {
         this.model(cctvUrl, window.point[preNum]);
       }
       // 加载Geojson点
-      if (node.label.indexOf("点") > -1 && !node.children) {
+      if (node.label.indexOf("point") > -1 && !node.children) {
         let geojsonurl = "./data/testdata/geojson/" + node.label + ".geojson";
-        this.spreadPoint(geojsonurl);
+        let geojsondataPath =
+          "./data/testdata/geojson/数据/" + node.label + ".geojson";
+        console.log(geojsonurl);
+        this.spreadPoint(geojsonurl, geojsondataPath);
+      }
+      // 加载Geojson线
+      if (node.label.indexOf("polyline") > -1 && !node.children) {
+        let geojsonurl = "./data/testdata/geojson/" + node.label + ".geojson";
+        let geojsondataPath =
+          "./data/testdata/geojson/数据/" + node.label + ".geojson";
+        this.spreadPolyline(geojsonurl, geojsondataPath);
       }
     },
     // 添加模型
@@ -324,42 +335,181 @@ export default {
       window.tilesetmodel = tileset;
     },
     //撒点
-    spreadPoint(geojsonurl) {
-      // let FieldList = [];
-      // let objKeysArr = Object.keys(properties);
-      // let labelfield = objKeysArr[0];
-      // if (objKeysArr[1]) {
-      //   FieldList.push(objKeysArr[0]);
-      //   FieldList.push(objKeysArr[1]);
-      // } else {
-      //   FieldList.push(objKeysArr[0]);
-      // }
-      let FieldList = ["lng", "lat"];
-      let labelfield = "lng";
-      window.FieldList = FieldList;
-      let opt = {
-        iconurl: "assets/image图片/blueicon.png",
-        selectediconurl: "assets/image图片/redicon.png",
-        iconwidth: 40,
-        iconheight: 50,
-        labeloffsetx: -10,
-        labeloffsety: -10,
-        iconoffsetx: 0,
-        iconoffsety: 0,
-        scaleDistance: [6000, 0.5],
-        height: 0.5,
-        labelfield,
-        geojsonurl,
-        FieldList
-      };
+    spreadPoint(geojsonurl, geojsondataPath) {
+      this.clear();
+      var script = document.createElement("script");
+      script.src = geojsondataPath;
+      document.body.appendChild(script);
+      setTimeout(() => {
+        // flyToHome
+        let point = a.features[0].geometry.coordinates;
+        let scene = GlobalViewer.scene;
+        let camera = scene.mainCamera;
+        let position = Li.Cartographic.fromDegrees(point[0], point[1], 100);
+        camera.flyTo(position);
+        let FieldList = [];
+        let properties = a.features[0].properties;
+        let objKeysArr = Object.keys(properties);
+        if (objKeysArr[1]) {
+          FieldList.push(objKeysArr[0]);
+          FieldList.push(objKeysArr[1]);
+        } else {
+          FieldList.push(objKeysArr[0]);
+        }
+        let labelfield = "";
+        if (FieldList.join("-").indexOf("name") > -1) {
+          labelfield = "name";
+        } else if (FieldList.join("-").indexOf("卡口") > -1) {
+          labelfield = "卡口";
+        } else if (FieldList.join("-").indexOf("lat") > -1) {
+          labelfield = "lat";
+        } else if (FieldList.join("-").indexOf("Crime ID") > -1) {
+          labelfield = "Crime ID";
+        } else {
+          labelfield = "jd";
+        }
 
-      this.GeoJsonModel = this.addGeoJsonModel(opt);
+        window.FieldList = FieldList;
+        let opt = {
+          iconurl: "assets/image图片/blueicon.png",
+          selectediconurl: "assets/image图片/redicon.png",
+          iconwidth: 40,
+          iconheight: 50,
+          labeloffsetx: -10,
+          labeloffsety: -10,
+          iconoffsetx: 0,
+          iconoffsety: 0,
+          scaleDistance: [6000, 0.5],
+          height: 10,
+          labelfield,
+          geojsonurl,
+          FieldList
+        };
+        this.GeoJsonModel = this.addGeoJsonModel(opt);
+      }, 500);
     },
+    //撒线
+    spreadPolyline(geojsonurl, geojsondataPath) {
+      this.clear(); // 删除原有的geojson
+      // 删除创建的线
+      if (window.entityLine.length != 0) {
+        for (let i = 0; i < window.entityLine.length; i++) {
+          var entitys = window.entityLine[i];
+          entitys.delete();
+        }
+        window.entityLine = [];
+      }
+      var script = document.createElement("script");
+      script.src = geojsondataPath;
+      document.body.appendChild(script);
+      setTimeout(() => {
+        // flyToHome
+        var middle = Math.floor(
+          a.features[0].geometry.coordinates[0].length / 2
+        );
+        let point = a.features[0].geometry.coordinates[0][middle];
+        if (a.features[0].geometry.coordinates.length != 1) {
+          var middle1 = Math.floor(
+            a.features[0].geometry.coordinates.length / 2
+          );
+          point = a.features[0].geometry.coordinates[middle1];
+        }
+        let scene = GlobalViewer.scene;
+        let camera = scene.mainCamera;
+        let position = Li.Cartographic.fromDegrees(point[0], point[1], 100);
+        camera.flyTo(position);
+        // 撒点
+        let FieldList = [];
+        let properties = a.features[0].properties;
+        let objKeysArr = Object.keys(properties);
+        if (objKeysArr[1]) {
+          FieldList.push(objKeysArr[0]);
+          FieldList.push(objKeysArr[1]);
+        } else {
+          FieldList.push(objKeysArr[0]);
+        }
+        let labelfield = "";
+        if (FieldList.join("-").indexOf("name") > -1) {
+          labelfield = "name";
+        } else if (FieldList.join("-").indexOf("FID_道路") > -1) {
+          labelfield = "FID_道路";
+        } else {
+          labelfield = "OBJECTID";
+        }
+
+        window.FieldList = FieldList;
+        let opt = {
+          iconurl: "assets/image图片/blueicon.png",
+          selectediconurl: "assets/image图片/redicon.png",
+          iconwidth: 40,
+          iconheight: 50,
+          labeloffsetx: -10,
+          labeloffsety: -10,
+          iconoffsetx: 0,
+          iconoffsety: 0,
+          scaleDistance: [6000, 0.5],
+          height: 10,
+          labelfield,
+          geojsonurl,
+          FieldList
+        };
+        this.GeoJsonModel = this.addGeoJsonModel(opt);
+        // 绘制多线段
+        a.features.forEach(item => {
+          let pointList = item.geometry.coordinates[0];
+          let polylinepoint = [];
+          pointList.forEach(position => {
+            let coordinate = Li.Cartesian3.fromDegrees(
+              position[0],
+              position[1],
+              0
+            );
+            polylinepoint.push(coordinate.toVector3());
+          });
+          var opt = {
+            width: 5, //线宽
+            alpha: 1, //线的透明度
+            pointArr: polylinepoint, //坐标点
+            color: Li.Color.fromRgb(211, 25, 222, 1), //线的颜色
+            altitudemethod: Li.AltitudeMethod.Absolute, //海拔高度模式
+            altitude: 0,
+            glow: true,
+            name: "xian~glow", //名称
+            id: "xianid~glow" //id
+          };
+          let polyline = this.addPolyline(opt);
+          window.entityLine.push(polyline);
+        });
+      }, 500);
+    },
+    // 绘制多线段
+    addPolyline(opt) {
+      var polyline = new Li.Polyline3D();
+      polyline.setWidth(opt.width);
+      polyline.alpha = opt.alpha >= 1 ? 0.99 : opt.alpha; //alpha透明度不能设置为1.0
+      for (var i = 0; i < opt.pointArr.length; i++) {
+        polyline.addPoint(opt.pointArr[i]);
+      }
+      polyline.color = opt.color;
+      polyline.depthTest = opt.depthTest == undefined ? true : opt.depthTest; //是否关闭深度检测
+      polyline.setAltitudeMethod(opt.altitudemethod);
+      if (opt.altitude) {
+        polyline.setAltitude(opt.altitude);
+      }
+      polyline.setMinDistance(5.0); //设定插点的最小距离
+      polyline.setGlowMaterial(opt.glow == undefined ? false : opt.glow); //发光
+      polyline.name = opt.name;
+      if (opt.id) {
+        polyline.id = opt.id;
+        polyline.addProperty("id", opt.id); //拾取 属性设置
+        polyline.addProperty("name", opt.name);
+      }
+      polyline.draw();
+      polyline.end();
+      return polyline;
+    },
+    // geojson创建
     addGeoJsonModel(opt) {
-      let scene = GlobalViewer.scene;
-      let camera = scene.mainCamera;
-      let position = Li.Cartographic.fromDegrees(114.054494, 22.540745, 1300);
-      camera.flyTo(position);
       opt = opt || {};
       let url = window.document.location.href;
       let baseUrl = url.substring(0, url.lastIndexOf("/") + 1);
@@ -382,15 +532,12 @@ export default {
         opt.scaleDistance[1]
       );
       GeoJsonModel.height = opt.height; //高度
-      console.log(opt.labelfield);
-      console.log(GeoJsonModel);
-      console.log(GeoJsonModel.labelField);
-
       GeoJsonModel.labelField = opt.labelfield; //标签
       GeoJsonModel.addField(opt.FieldList[0]); //添加字段
       GeoJsonModel.addField(opt.FieldList[1]); //添加字段
+      console.log(opt.geojsonurl);
       if (opt.geojsonurl) {
-        GeoJsonModel.load(opt.geojsonurl); //加载GeoJson文件的url
+        GeoJsonModel.load(baseUrl + opt.geojsonurl.slice(2)); //加载GeoJson文件的url
       }
       //or addString可通过字符串类型数据加载
       if (opt.testString) {
@@ -405,11 +552,23 @@ export default {
         let feature = Li.GeoJsonModel.getSelectedFeature();
         if (feature) {
           console.log("拾取撒点属性");
+          console.log(window.FieldList);
           let property = feature.getProperty(window.FieldList[0]); //要查询的属性
-          if (property) {
-            console.log(window.FieldList[0] + property);
+          let property1 = feature.getProperty(window.FieldList[1]); //要查询的属性
+          if (property1) {
+            console.log(window.FieldList[0] + ":" + property);
+            console.log(window.FieldList[1] + ":" + property1);
+          } else {
+            console.log(window.FieldList[0] + ":" + property);
           }
         }
+      }
+    },
+    // 删除geojson
+    clear() {
+      if (this.GeoJsonModel != null) {
+        this.GeoJsonModel.delete();
+        this.GeoJsonModel = null;
       }
     }
   },
@@ -461,11 +620,12 @@ export default {
         model.push(item);
       } else {
         item.children.forEach(geojsonItem => {
-          if (geojsonItem.label.indexOf("点") > -1) {
+          if (geojsonItem.label.indexOf("point") > -1) {
             GeoJSONPoint.push(geojsonItem);
-          } else if (geojsonItem.label.indexOf("线") > -1) {
+            9;
+          } else if (geojsonItem.label.indexOf("polyline") > -1) {
             GeoJSONPolily.push(geojsonItem);
-          } else if (geojsonItem.label.indexOf("面") > -1) {
+          } else if (geojsonItem.label.indexOf("polygon") > -1) {
             GeoJSONPoligon.push(geojsonItem);
           }
         });

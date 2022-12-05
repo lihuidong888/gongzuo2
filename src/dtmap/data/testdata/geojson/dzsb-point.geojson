@@ -1,4 +1,4 @@
-var a = {
+{
 "type": "FeatureCollection",
 "name": "电子哨兵0324",
 "crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:EPSG::4490" } },
@@ -1251,4 +1251,3 @@ var a = {
 { "type": "Feature", "properties": { "卡口": "广州中医药大学深圳医院综合楼行政办公区电梯厅", "进出类型": "进" }, "geometry": { "type": "Point", "coordinates": [ 114.036188256726476, 22.562127320115803 ] } }
 ]
 }
-window.properties =a.features[0].properties;

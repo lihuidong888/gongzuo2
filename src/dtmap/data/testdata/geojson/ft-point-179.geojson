@@ -1,4 +1,4 @@
-var a = {
+{
 "type": "FeatureCollection",
 "name": "futian-point-179",
 "crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
@@ -184,4 +184,3 @@ var a = {
 { "type": "Feature", "properties": { "OBJECTID": 0, "name": "辛诚花园03栋", "h": 0.0 }, "geometry": { "type": "Point", "coordinates": [ 114.061655193870777, 22.534199786343816 ] } }
 ]
 }
-window.properties =a.features[0].properties;
