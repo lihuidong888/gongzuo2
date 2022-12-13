@@ -16,7 +16,7 @@ var a = [
     label: "fbx模型",
     children: [
       { id: "39", label: "Girl" },
-      { id: "310", label: "xmh-epsg4547" }
+      // { id: "310", label: "xmh-epsg4547" }
     ],
     path: "./data/testdata/models/fbx"
   },
@@ -24,9 +24,9 @@ var a = [
     id: "241",
     label: "glb模型",
     children: [
-      { id: "312", label: "batched" },
+      // { id: "312", label: "batched" },
       { id: "313", label: "batchedAnimated" },
-      { id: "314", label: "batchedQuantization" },
+      // { id: "314", label: "batchedQuantization" },
       { id: "315", label: "box" },
       { id: "316", label: "BoxTextured" },
       { id: "317", label: "BoxTexturedKtx2Basis" },
@@ -42,7 +42,7 @@ var a = [
       { id: "327", label: "InterpolationTest" },
       { id: "328", label: "MultiUVTest" },
       { id: "329", label: "ParcLeadMine" },
-      { id: "330", label: "parent" },
+      // { id: "330", label: "parent" },
       { id: "331", label: "Pawns" },
       { id: "332", label: "Shadow_Tester" },
       { id: "333", label: "Shadow_Tester_2" },
@@ -70,12 +70,12 @@ var a = [
     label: "geojson模型",
     children: [
       { id: "348", label: "area-polygon" },
-      { id: "349", label: "building-polygon" },
+      // { id: "349", label: "building-polygon" },
       { id: "350", label: "dzsb-point" },
       { id: "351", label: "dzsbsj-point" },
       { id: "352", label: "ft-point-179" },
-      { id: "353", label: "ft-point" },
-      { id: "354", label: "ft-polygon" },
+      // { id: "353", label: "ft-point" },
+      // { id: "354", label: "ft-polygon" },
       { id: "355", label: "ft-polyline-1370" },
       { id: "356", label: "ft1-polygon" },
       { id: "357", label: "heatmap-point" },
@@ -83,8 +83,8 @@ var a = [
       { id: "359", label: "lh-polygon" },
       { id: "360", label: "line-polyline" },
       { id: "361", label: "minzhi-polygon" },
-      { id: "362", label: "roads-polyline" },
-      { id: "363", label: "street-point" },
+      // { id: "362", label: "roads-polyline" },
+      // { id: "363", label: "street-point" },
       { id: "364", label: "sz-polygon" }
     ],
     path: "./data/testdata/geojson"

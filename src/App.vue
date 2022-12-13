@@ -43,7 +43,7 @@
         />
         数据图层
       </div>
-      <div>
+      <div class="tool">
         <img
           src="./dtmap/assets/image图片/工具.png"
           width="24px"
@@ -58,15 +58,50 @@
         />
         <img
           v-else
-          class="tool"
           src="./dtmap/assets/image图片/向下拉箭头.png"
           width="24px"
           height="24px"
         />
+        <!-- 工具选项 -->
+        <div class="toolItem">
+          <div @click="openMeasure">
+            <img
+              src="./dtmap/assets/image图片/尺子.png"
+              width="24px"
+              height="24px"
+            />
+            图上量算
+          </div>
+          <div>
+            <img
+              src="./dtmap/assets/image图片/空间.png"
+              width="24px"
+              height="24px"
+            />
+            空间分析
+          </div>
+          <div>
+            <img
+              src="./dtmap/assets/image图片/定位.png"
+              width="24px"
+              height="24px"
+            />
+            坐标定位
+          </div>
+          <div>
+            <img
+              src="./dtmap/assets/image图片/飞行.png"
+              width="24px"
+              height="24px"
+            />
+            飞行漫游
+          </div>
+        </div>
       </div>
     </div>
-    <baseMap :showBaseMap.sync="showBaseMap" ref="baseMap"/>
-    <dataLayer :showDataLayer.sync="showDataLayer"/>
+    <baseMap :showBaseMap.sync="showBaseMap" ref="baseMap" />
+    <dataLayer :showDataLayer.sync="showDataLayer" />
+    <measure :showMeasure.sync="showMeasure" />
   </div>
 </template>
 
@@ -74,6 +109,7 @@
 import QtLoader from "./qtloader";
 import baseMap from "./dtmap/components/baseMap.vue";
 import dataLayer from "./dtmap/components/dataLayer.vue";
+import measure from "./dtmap/components/tool/measure.vue";
 export default {
   name: "App",
   methods: {
@@ -84,17 +120,17 @@ export default {
       var status = document.querySelector("#qtstatus");
       var qtLoader = QtLoader({
         canvasElements: [canvas],
-        showLoader: function (loaderStatus) {
+        showLoader: function(loaderStatus) {
           spinner.style.display = "block";
           canvas.style.display = "none";
           status.innerHTML = loaderStatus + "...";
         },
-        showError: function (errorText) {
+        showError: function(errorText) {
           status.innerHTML = errorText;
           spinner.style.display = "block";
           canvas.style.display = "none";
         },
-        showExit: function () {
+        showExit: function() {
           status.innerHTML = "Application exit";
           if (qtLoader.exitCode !== undefined)
             status.innerHTML += " with code " + qtLoader.exitCode;
@@ -103,10 +139,10 @@ export default {
           spinner.style.display = "block";
           canvas.style.display = "none";
         },
-        showCanvas: function () {
+        showCanvas: function() {
           spinner.style.display = "none";
           canvas.style.display = "block";
-        },
+        }
       });
       qtLoader.loadEmscriptenModule("teramap");
       /*------------底层库初始化end------------------*/
@@ -116,7 +152,7 @@ export default {
       window.baseUrl = baseUrl;
 
       //底层库加载完成后自动调用
-      window.initScene = function () {
+      window.initScene = function() {
         console.log("加载完成");
         var viewer = GlobalViewer;
         //viewer.setBaseUrl("https://xxxxxx/");  //设置引擎资源的路径, 根据你的项目进行配置
@@ -156,22 +192,57 @@ export default {
     baseMap() {
       this.showDataLayer = false;
       this.showBaseMap = true;
+      this.showMeasure = false;
     },
     // 数据图层,关闭其他
-    dataLayer(){
+    dataLayer() {
       this.showBaseMap = false;
       this.showDataLayer = true;
+      this.showMeasure = false;
     },
+    // 打开测量
+    openMeasure(){
+       this.showMeasure = true;
+    },
+    // 初始化样式
+    styleInit() {
+      var oTool = document.getElementsByClassName("tool")[0];
+      var oToolItem = document.getElementsByClassName("toolItem")[0];
+      oTool.addEventListener("mouseenter", () => {
+        this.showArrow = true;
+        this.showMeasure = false;
+        this.showBaseMap = false;
+        this.showDataLayer = false;
+
+        oToolItem.style.display = "block";
+        oToolItem.style.height = "0px";
+
+        setTimeout(() => {
+          oToolItem.style.height = "200px";
+          oToolItem.style.transition = "all 1s";
+        }, 100);
+      });
+      oTool.addEventListener("mouseleave", () => {
+        this.showArrow = false;
+        oToolItem.style.display = "none";
+      });
+      // 点击对应的工具选项显示对应的选项卡,隐藏工具栏
+      oToolItem.addEventListener("click", e => {
+        oToolItem.style.display = "none";
+      });
+    }
   },
   components: {
     baseMap,
-    dataLayer
+    dataLayer,
+    measure
   },
   data() {
     return {
       showArrow: false,
       showBaseMap: false,
-      showDataLayer: false
+      showDataLayer: false,
+      showMeasure: false,
     };
   },
   mounted() {
@@ -179,10 +250,12 @@ export default {
     // 加载影像
     window.nowLayer = null;
     // 刚开始加载遥感影像
-    setTimeout(()=>{
+    setTimeout(() => {
       this.$refs.baseMap.addImagery();
-    },2000)
-  },
+    }, 2000);
+    // 初始化样式
+    this.styleInit();
+  }
 };
 </script>
 
@@ -254,10 +327,22 @@ html {
   line-height: 50px;
   cursor: pointer;
 }
+.ui-wrapper img {
+  vertical-align: middle;
+}
 .ui-wrapper > div:hover {
   color: rgba(45, 133, 240, 0.8);
 }
-.ui-wrapper img {
-  vertical-align: middle;
+/* 下面是工具模块的样式 */
+.ui-wrapper > div:hover div {
+  color: #fff;
+}
+.toolItem {
+  background-color: rgba(36, 56, 72, 0.9);
+  height: 0;
+  overflow: hidden;
+}
+.ui-wrapper .toolItem div:hover {
+  color: rgba(45, 133, 240, 0.8);
 }
 </style>

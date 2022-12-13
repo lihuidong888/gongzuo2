@@ -28,7 +28,9 @@ window.point = [
 ];
 window.FieldList = []; //撒点属性
 window.checkObj = []; //选中的节点
-window.entityLine = [];
+window.entityLine = []; //线实体
+window.entityFace = []; //面实体
+window.pointPolygonList = []; //面的点列表
 import data from "../data/modelFile/writeFile";
 export default {
   data() {
@@ -36,128 +38,6 @@ export default {
       nowscale: 1, // 缩放比例
       dataTree: [],
       GeoJsonModel: null,
-      haha: [
-        {
-          id: 0,
-          label: "三维模型",
-          children: [
-            {
-              id: "28",
-              label: "DAE模型",
-              children: [
-                { id: "34", label: "dabache" },
-                { id: "35", label: "hongseqiaoche" },
-                { id: "36", label: "huiseqiaoche" },
-                { id: "37", label: "lanseqiaoche" }
-              ],
-              path: "./data/testdata/models/dae/cars"
-            },
-            {
-              id: "211",
-              label: "fbx模型",
-              children: [
-                { id: "39", label: "Girl" },
-                { id: "310", label: "xmh-epsg4547" }
-              ],
-              path: "./data/testdata/models/fbx"
-            },
-            {
-              id: "241",
-              label: "glb模型",
-              children: [
-                { id: "312", label: "batched" },
-                { id: "313", label: "batchedAnimated" },
-                { id: "314", label: "batchedQuantization" },
-                { id: "315", label: "box" },
-                { id: "316", label: "BoxTextured" },
-                { id: "317", label: "BoxTexturedKtx2Basis" },
-                { id: "318", label: "camera_180" },
-                { id: "319", label: "CesiumBalloon" },
-                { id: "320", label: "CesiumBalloonKTX2" },
-                { id: "321", label: "CesiumDrone" },
-                { id: "322", label: "CesiumMilkTruck" },
-                { id: "323", label: "CesiumTexturedBoxTest" },
-                { id: "324", label: "Cesium_Air" },
-                { id: "325", label: "Cesium_Man" },
-                { id: "326", label: "GroundVehicle" },
-                { id: "327", label: "InterpolationTest" },
-                { id: "328", label: "MultiUVTest" },
-                { id: "329", label: "ParcLeadMine" },
-                { id: "330", label: "parent" },
-                { id: "331", label: "Pawns" },
-                { id: "332", label: "Shadow_Tester" },
-                { id: "333", label: "Shadow_Tester_2" },
-                { id: "334", label: "Shadow_Tester_3" },
-                { id: "335", label: "Shadow_Tester_4" },
-                { id: "336", label: "Shadow_Tester_Point" },
-                { id: "337", label: "Shadow_Transparent" },
-                { id: "338", label: "textured_box" },
-                { id: "339", label: "tree3" },
-                { id: "340", label: "Wood_Tower" }
-              ],
-              path: "./data/testdata/models/gltf_glb"
-            },
-            {
-              id: "243",
-              label: "3dtile",
-              children: [
-                { id: "342", label: "ft", path: "./data/testdata/3dtiles/ft" },
-                {
-                  id: "344",
-                  label: "ft-pipe",
-                  path: "./data/testdata/3dtiles/ft-pipe"
-                },
-                {
-                  id: "346",
-                  label: "BIM",
-                  path: "./data/testdata/BIM/BIM_TEST_g1"
-                }
-              ]
-            }
-          ]
-        },
-        {
-          id: -1,
-          label: "矢量数据",
-          children: [
-            {
-              id: 1,
-              label: "GeoJSON点",
-              children: [
-                { id: "349", label: "福田128点" },
-                { id: "351", label: "福田179点" },
-                { id: "355", label: "福田热力图点" },
-                { id: "357", label: "福田街道点" },
-                { id: "358", label: "福田设施点" },
-                { id: "360", label: "福田重要区域点" },
-                { id: "361", label: "福田防疫点" }
-              ]
-            },
-            {
-              id: 0,
-              label: "GeoJSON线",
-              children: [
-                { id: "350", label: "福田1370线" },
-                { id: "353", label: "福田多线段" },
-                { id: "359", label: "福田道路多线段" }
-              ]
-            },
-            {
-              id: -1,
-              label: "GeoJSON面",
-              children: [
-                { id: "348", label: "深圳面" },
-                { id: "352", label: "福田人民建筑面" },
-                { id: "354", label: "福田建筑面" },
-                { id: "356", label: "福田瘟疫面" },
-                { id: "362", label: "福田防疫面" },
-                { id: "363", label: "福田面区域" },
-                { id: "364", label: "福田面图" }
-              ]
-            }
-          ]
-        }
-      ],
       defaultProps: {
         children: "children",
         label: "label"
@@ -178,7 +58,7 @@ export default {
         num = Math.floor(Math.random() * 6);
       }
       preNum = num;
-      // 目标多选框被去掉时候,不加载模型,删除模型并跳转到选中的第一个
+      // 目标多选框被去掉时候,删除模型不跳转
       console.log("1111", node, checkObj);
       window.checkObj.push(checkObj);
       let length = window.checkObj.length;
@@ -189,17 +69,20 @@ export default {
         ) {
           this.deletemodel();
           this.deleteTiles();
-          let firstNodes = [];
-          window.checkObj[length - 1].checkedNodes.forEach(item => {
-            if (!item.children) {
-              firstNodes.push(item);
-            }
-          });
-          if (firstNodes.length) {
-            node = firstNodes[0];
-          } else {
-            return;
-          }
+          this.clear();
+          return;
+          // 目标多选框被去掉时候,不加载模型,删除模型并跳转到选中的第一个
+          // let firstNodes = [];
+          // window.checkObj[length - 1].checkedNodes.forEach(item => {
+          //   if (!item.children) {
+          //     firstNodes.push(item);
+          //   }
+          // });
+          // if (firstNodes.length) {
+          //   node = firstNodes[0];
+          // } else {
+          //   return;
+          // }
         }
       }
       // 加载glb模型
@@ -235,7 +118,6 @@ export default {
         let geojsonurl = "./data/testdata/geojson/" + node.label + ".geojson";
         let geojsondataPath =
           "./data/testdata/geojson/数据/" + node.label + ".geojson";
-        console.log(geojsonurl);
         this.spreadPoint(geojsonurl, geojsondataPath);
       }
       // 加载Geojson线
@@ -244,6 +126,13 @@ export default {
         let geojsondataPath =
           "./data/testdata/geojson/数据/" + node.label + ".geojson";
         this.spreadPolyline(geojsonurl, geojsondataPath);
+      }
+      // 加载Geojson面
+      if (node.label.indexOf("polygon") > -1 && !node.children) {
+        let geojsonurl = "./data/testdata/geojson/" + node.label + ".geojson";
+        let geojsondataPath =
+          "./data/testdata/geojson/面数据/" + node.label + ".geojson";
+        this.spreadFace(geojsonurl, geojsondataPath);
       }
     },
     // 添加模型
@@ -259,7 +148,9 @@ export default {
           point.lat,
           point.height
         ); //坐标
-
+        if (path.indexOf("DAE") > -1) {
+          model.rotation = Li.Quaternion.fromEulerAngles(-90, 0, 0);
+        }
         model.transform.cartographic = carto;
         //模型正在渲染中
         model.readyPromise.then(() => {
@@ -334,7 +225,7 @@ export default {
       });
       window.tilesetmodel = tileset;
     },
-    //撒点
+    //撒点 -- 点
     spreadPoint(geojsonurl, geojsondataPath) {
       this.clear();
       var script = document.createElement("script");
@@ -388,31 +279,20 @@ export default {
         this.GeoJsonModel = this.addGeoJsonModel(opt);
       }, 500);
     },
-    //撒线
+    //撒点 -- 线
     spreadPolyline(geojsonurl, geojsondataPath) {
       this.clear(); // 删除原有的geojson
-      // 删除创建的线
-      if (window.entityLine.length != 0) {
-        for (let i = 0; i < window.entityLine.length; i++) {
-          var entitys = window.entityLine[i];
-          entitys.delete();
-        }
-        window.entityLine = [];
-      }
       var script = document.createElement("script");
       script.src = geojsondataPath;
       document.body.appendChild(script);
       setTimeout(() => {
         // flyToHome
-        var middle = Math.floor(
-          a.features[0].geometry.coordinates[0].length / 2
-        );
-        let point = a.features[0].geometry.coordinates[0][middle];
-        if (a.features[0].geometry.coordinates.length != 1) {
-          var middle1 = Math.floor(
-            a.features[0].geometry.coordinates.length / 2
-          );
-          point = a.features[0].geometry.coordinates[middle1];
+        let coordinates = a.features[0].geometry.coordinates;
+        var middle = Math.floor(coordinates[0].length / 2);
+        let point = coordinates[0][middle];
+        if (coordinates.length != 1) {
+          var middle1 = Math.floor(coordinates.length / 2);
+          point = coordinates[middle1];
         }
         let scene = GlobalViewer.scene;
         let camera = scene.mainCamera;
@@ -482,6 +362,109 @@ export default {
         });
       }, 500);
     },
+    //撒点 -- 面
+    spreadFace(geojsonurl, geojsondataPath) {
+      this.clear();
+      var script = document.createElement("script");
+      script.src = geojsondataPath;
+      document.body.appendChild(script);
+      setTimeout(() => {
+        // flyToHome
+        let coordinates = a.features[0].geometry.coordinates;
+        let point = coordinates[0][0][0];
+        if (typeof coordinates[0][0][0] === "number") {
+          point = coordinates[0][0];
+        }
+        let scene = GlobalViewer.scene;
+        let camera = scene.mainCamera;
+        let position = Li.Cartographic.fromDegrees(point[0], point[1], 100);
+        camera.flyTo(position);
+        let FieldList = [];
+        let properties = a.features[0].properties;
+        let objKeysArr = Object.keys(properties);
+        FieldList.push(objKeysArr[0]);
+        FieldList.push(objKeysArr[1]);
+        FieldList.push(objKeysArr[2]);
+        let labelfield = "";
+        if (FieldList.join("-").indexOf("居住生活区") > -1) {
+          labelfield = "居住生活区";
+        } else if (FieldList.join("-").indexOf("OBJECTID") > -1) {
+          labelfield = "OBJECTID";
+        } else if (FieldList.join("-").indexOf("batchid") > -1) {
+          labelfield = "batchid";
+        } else if (FieldList.join("-").indexOf("ID") > -1) {
+          labelfield = "ID";
+        } else {
+          labelfield = "name";
+        }
+        window.FieldList = FieldList;
+        let opt = {
+          iconurl: "assets/image图片/blueicon.png",
+          selectediconurl: "assets/image图片/redicon.png",
+          iconwidth: 40,
+          iconheight: 50,
+          labeloffsetx: -10,
+          labeloffsety: -10,
+          iconoffsetx: 0,
+          iconoffsety: 0,
+          scaleDistance: [6000, 0.5],
+          height: 5,
+          labelfield,
+          geojsonurl,
+          FieldList
+        };
+        this.GeoJsonModel = this.addGeoJsonModel(opt);
+        // 绘制面
+        a.features.forEach(item => {
+          let pointItem = item.geometry.coordinates[0][0];
+          if (typeof coordinates[0][0][0] === "number") {
+            pointItem = coordinates[0];
+          }
+          pointItem.forEach(position => {
+            let coordinate = Li.Cartesian3.fromDegrees(
+              position[0],
+              position[1],
+              0
+            );
+            window.pointPolygonList.push(coordinate.toVector3());
+          });
+          let polygonObj = {
+            width: 1,
+            alpha: 0.8,
+            pointArr: window.pointPolygonList,
+            color: Li.Color.fromRgb(0, 240, 120, 128),
+            borColor: Li.Color.fromRgb(83, 255, 26, 255),
+            altitude: Li.AltitudeMethod.OnTerrain,
+            name: "polygon"
+          };
+          let polygon = this.drawPolygon3D(polygonObj);
+          window.entityFace.push(polygon);
+        });
+      }, 500);
+    },
+    // 绘制面
+    drawPolygon3D(opt) {
+      var polygon3d = new Li.Polygon3D();
+      polygon3d.fillAlpha = opt.fillAlpha >= 1 ? 0.99 : opt.fillAlpha || 0.99; //填充透明度
+      polygon3d.color = opt.borColor; //边界颜色
+      polygon3d.setWidth(opt.width); //边界宽度
+      polygon3d.alpha = opt.alpha >= 1 ? 0.99 : opt.alpha || 0.99; //alpha透明度不能设置为1.0 //边界透明度
+      polygon3d.setFillColor(opt.color); //填充颜色，颜色，画笔类型
+      opt.pointArr.forEach(item => {
+        polygon3d.addPoint(item);
+      });
+      polygon3d.setAltitudeMethod(opt.altitude); //海拔高度模式
+      polygon3d.name = opt.name;
+      polygon3d.addProperty("name", opt.name);
+      if (opt.id) {
+        polygon3d.id = opt.id;
+        polygon3d.addProperty("id", opt.id);
+      }
+      polygon3d.draw();
+      polygon3d.end();
+      window.pointPolygonList = [];
+      return polygon3d;
+    },
     // 绘制多线段
     addPolyline(opt) {
       var polyline = new Li.Polyline3D();
@@ -535,7 +518,6 @@ export default {
       GeoJsonModel.labelField = opt.labelfield; //标签
       GeoJsonModel.addField(opt.FieldList[0]); //添加字段
       GeoJsonModel.addField(opt.FieldList[1]); //添加字段
-      console.log(opt.geojsonurl);
       if (opt.geojsonurl) {
         GeoJsonModel.load(baseUrl + opt.geojsonurl.slice(2)); //加载GeoJson文件的url
       }
@@ -564,11 +546,28 @@ export default {
         }
       }
     },
-    // 删除geojson
+    // 删除geojson,geojson线
     clear() {
+      // 删除geojson
       if (this.GeoJsonModel != null) {
         this.GeoJsonModel.delete();
         this.GeoJsonModel = null;
+      }
+      // 删除创建的线
+      if (window.entityLine.length != 0) {
+        for (let i = 0; i < window.entityLine.length; i++) {
+          var entitys = window.entityLine[i];
+          entitys.delete();
+        }
+        window.entityLine = [];
+      }
+      // 删除创建的面
+      if (window.entityFace.length != 0) {
+        for (let i = 0; i < window.entityFace.length; i++) {
+          var entitys = window.entityFace[i];
+          entitys.delete();
+        }
+        window.entityFace = [];
       }
     }
   },
@@ -636,7 +635,6 @@ export default {
   }
 };
 </script>
-
 <style scoped>
 .dataLayer {
   position: absolute;
