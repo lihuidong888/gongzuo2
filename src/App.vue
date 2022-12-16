@@ -72,7 +72,7 @@
             />
             图上量算
           </div>
-          <div>
+          <div @click="openSpace">
             <img
               src="./dtmap/assets/image图片/空间.png"
               width="24px"
@@ -80,7 +80,7 @@
             />
             空间分析
           </div>
-          <div>
+          <div @click="openPositionSetting">
             <img
               src="./dtmap/assets/image图片/定位.png"
               width="24px"
@@ -102,6 +102,8 @@
     <baseMap :showBaseMap.sync="showBaseMap" ref="baseMap" />
     <dataLayer :showDataLayer.sync="showDataLayer" />
     <measure :showMeasure.sync="showMeasure" />
+    <position :showPosition.sync="showPosition" />
+    <space :showSpace.sync="showSpace" />
   </div>
 </template>
 
@@ -110,6 +112,8 @@ import QtLoader from "./qtloader";
 import baseMap from "./dtmap/components/baseMap.vue";
 import dataLayer from "./dtmap/components/dataLayer.vue";
 import measure from "./dtmap/components/tool/measure.vue";
+import position from "./dtmap/components/tool/position.vue";
+import space from "./dtmap/components/tool/space.vue";
 export default {
   name: "App",
   methods: {
@@ -178,7 +182,7 @@ export default {
       console.log(camera);
       var tianditu = new Li.TiandituImageryLayer();
       tianditu.url =
-        "https://t2.tianditu.gov.cn/DataServer?T=img_c&x={x}&y={y}&l={z}&tk=5ec3e996393521a1a9fb1681f13201ff";
+        "https://t8.tianditu.gov.cn/DataServer?T=img_c&x={x}&y={y}&l={z}&tk=5ec3e996393521a1a9fb1681f13201ff";
       tianditu.useWebMercator = false;
       tianditu.tileWidth = 256;
       tianditu.tileHeight = 256;
@@ -193,16 +197,28 @@ export default {
       this.showDataLayer = false;
       this.showBaseMap = true;
       this.showMeasure = false;
+      this.showPosition = false;
+      this.showSpace = false;
     },
     // 数据图层,关闭其他
     dataLayer() {
       this.showBaseMap = false;
       this.showDataLayer = true;
       this.showMeasure = false;
+      this.showPosition = false;
+      this.showSpace = false;
     },
     // 打开测量
-    openMeasure(){
-       this.showMeasure = true;
+    openMeasure() {
+      this.showMeasure = true;
+    },
+    // 打开位置设置
+    openPositionSetting() {
+      this.showPosition = true;
+    },
+    // 打开空间
+    openSpace() {
+      this.showSpace = true;
     },
     // 初始化样式
     styleInit() {
@@ -213,6 +229,8 @@ export default {
         this.showMeasure = false;
         this.showBaseMap = false;
         this.showDataLayer = false;
+        this.showPosition = false;
+        this.showSpace = false;
 
         oToolItem.style.display = "block";
         oToolItem.style.height = "0px";
@@ -235,7 +253,9 @@ export default {
   components: {
     baseMap,
     dataLayer,
-    measure
+    measure,
+    position,
+    space
   },
   data() {
     return {
@@ -243,6 +263,8 @@ export default {
       showBaseMap: false,
       showDataLayer: false,
       showMeasure: false,
+      showPosition: false,
+      showSpace: false,
     };
   },
   mounted() {

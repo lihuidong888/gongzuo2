@@ -105,8 +105,8 @@ export default {
         }
       }
       // 这个针对测量体积
-      if(window.entityAllList && window.entityAllList.length > 0){
-           window.clearsMeasure();
+      if (window.entityAllList && window.entityAllList.length > 0) {
+        window.clearsMeasure();
       }
     },
     // 测量面积
@@ -194,7 +194,7 @@ export default {
   watch: {
     showOptions() {
       this.clearMeasure();
-      window.labelObj = [];// 每次换测量模块都清空存放的标签对象
+      window.labelObj = []; // 每次换测量模块都清空存放的标签对象
     },
     form: {
       handler(newValue) {
@@ -221,7 +221,7 @@ export default {
       },
       deep: true,
       immediate: true
-    },
+    }
   }
 };
 </script>
@@ -319,8 +319,8 @@ export default {
 }
 .measure .content .measureOption1 img,
 .measure .content .measureOption2 img {
-  width: 40px;
-  height: 40px;
+  width: 30px;
+  height: 30px;
   vertical-align: middle;
 }
 .measure .conversion {

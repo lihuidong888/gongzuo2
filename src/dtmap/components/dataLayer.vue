@@ -67,23 +67,50 @@ export default {
           window.checkObj[length - 1].checkedKeys.length <
           window.checkObj[length - 2].checkedKeys.length
         ) {
-          this.deletemodel();
-          this.deleteTiles();
-          this.clear();
+          if (window.cctvModel && node.label === window.cctvModel.name) {
+            this.deletemodel();
+          }
+          if (window.tilesetmodel && node.label === window.tilesetmodel.name) {
+            this.deleteTiles();
+          }
+          if (this.GeoJsonModel && node.label === this.GeoJsonModel.name) {
+            this.clear();
+          }
           return;
-          // 目标多选框被去掉时候,不加载模型,删除模型并跳转到选中的第一个
-          // let firstNodes = [];
-          // window.checkObj[length - 1].checkedNodes.forEach(item => {
-          //   if (!item.children) {
-          //     firstNodes.push(item);
-          //   }
-          // });
-          // if (firstNodes.length) {
-          //   node = firstNodes[0];
-          // } else {
-          //   return;
-          // }
         }
+      }
+      // 全选一级或者二级标题加载对应三级标题的模型或矢量数据的第一个
+      if (node.label == "三维模型" || node.label == "DAE模型") {
+        let cctvUrl = "./data/testdata/models/dae/cars/dabache.DAE";
+        this.model(cctvUrl, window.point[preNum]);
+      }
+      if (node.label == "fbx模型") {
+        let cctvUrl = "./data/testdata/models/fbx/Girl.fbx";
+        this.model(cctvUrl, window.point[preNum]);
+      }
+      if (node.label == "glb模型") {
+        let cctvUrl = "./data/testdata/models/gltf_glb/box.glb";
+        this.model(cctvUrl, window.point[preNum]);
+      }
+      if (node.label == "3dtile") {
+        this.addTilese("./data/testdata/3dtiles/ft");
+      }
+      if (node.label == "矢量数据" || node.label == "GeoJSON点") {
+        let geojsonurl = "./data/testdata/geojson/dzsb-point.geojson";
+        let geojsondataPath = "./data/testdata/geojson/数据/dzsb-point.geojson";
+        this.spreadPoint(geojsonurl, geojsondataPath);
+      }
+      if (node.label == "GeoJSON线") {
+        let geojsonurl = "./data/testdata/geojson/ft-polyline-1370.geojson";
+        let geojsondataPath =
+          "./data/testdata/geojson/数据/ft-polyline-1370.geojson";
+        this.spreadPolyline(geojsonurl, geojsondataPath);
+      }
+      if (node.label == "GeoJSON面") {
+        let geojsonurl = "./data/testdata/geojson/area-polygon.geojson";
+        let geojsondataPath =
+          "./data/testdata/geojson/面数据/area-polygon.geojson";
+        this.spreadFace(geojsonurl, geojsondataPath);
       }
       // 加载glb模型
       if (Number(node.id) >= 312 && Number(node.id) <= 340 && !node.children) {
@@ -180,6 +207,9 @@ export default {
             }
           });
         });
+        // 加名字标记删除
+        let name = path.slice(path.lastIndexOf("/") + 1, path.lastIndexOf("."));
+        entity.name = name;
         window.cctvModel = entity;
         return entity;
       }
@@ -206,9 +236,6 @@ export default {
           tilesetPath.slice(1) +
           "/" +
           "tileset.json"
-        // window.document.location.origin + "/" + "data/dayanta/tileset.json"
-        // window.document.location.origin + "/" + "data/testdata/BIM/BIM_TEST_g1/tileset.json"
-        // window.document.location.origin + "/" + "data/testdata/3dtiles/ft-pipe/tileset.json"
       );
       tileset.streamingMode = true; // default 流式加载
       tileset.skipLevelOfDetail = true; // default 跳过层级
@@ -223,6 +250,9 @@ export default {
         var p = Li.Cartographic.fromDegrees(cord.lon, cord.lat, 300);
         camera.cameraController().flyToCartographic(p, 3, 0, -90, 0);
       });
+      // 加名字标记删除
+      let name = tilesetPath.slice(tilesetPath.lastIndexOf("/") + 1);
+      tileset.name = name;
       window.tilesetmodel = tileset;
     },
     //撒点 -- 点
@@ -525,6 +555,11 @@ export default {
       if (opt.testString) {
         GeoJsonModel.addString(opt.testString);
       }
+      let name = opt.geojsonurl.slice(
+        opt.geojsonurl.lastIndexOf("/") + 1,
+        opt.geojsonurl.lastIndexOf(".")
+      );
+      GeoJsonModel.name = name;
       return GeoJsonModel;
     },
     // geojson创建，事件触发拾取撒点属性
